@@ -12,10 +12,11 @@ init_hadoop () {
     HADOOP_CD=${src%/*}
   fi
   local HADOOP_WC=$(dirname ${HADOOP_CD})
-  local HADOOP_HOME=${HADOOP_WC}/hadoop-$1
+  HADOOP_HOME=${HADOOP_WC}/hadoop-$1
   
   [ ! -e "$HADOOP_HOME" ] && echo -e "\e[31m hadoop distribution $1 doesn't exist.\e[0m" && return
 
+  export HADOOP_HOME
   export HADOOP_CONF_DIR=${HADOOP_CD}/etc/hadoop
   export HADOOP_LOG_DIR=${HADOOP_CD}/logs
   export HADOOP_PID_DIR=${HADOOP_CD}/pid
