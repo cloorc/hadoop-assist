@@ -18,7 +18,7 @@ init_hadoop () {
 
   export HADOOP_HOME
   export HADOOP_CONF_DIR=${HADOOP_CD}/etc/hadoop
-  export HADOOP_LOG_DIR=${HADOOP_CD}/logs
+  export HADOOP_LOG_DIR=${HADOOP_CD}/logs/hadoop
   export HADOOP_PID_DIR=${HADOOP_CD}/pid
   export HADOOP_LOGLEVEL=INFO
 

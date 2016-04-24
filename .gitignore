@@ -8,3 +8,5 @@ pid/
 /etc/hadoop/*-env.bat
 /etc/hadoop/*-env.cmd
 *.cmd
+metastore_db/
+derby.log
