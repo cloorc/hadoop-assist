@@ -14,7 +14,7 @@
 
 ## Usage
 
-> Before HDFS or HIVE server started, import settings from [`Hadoop Assistant Toolset`](https://github.com/soiff/hadoop-assist).
+> Before HDFS or HIVE server being started, import settings from [`Hadoop Assistant Toolset`](https://github.com/soiff/hadoop-assist).
 
 ```bash
 $ source prepare-assist/hadoop.sh 2.7.2
