@@ -30,6 +30,7 @@ init_hive() {
   cp $HIVE_HOME/conf/hive-log4j2.properties.template $HIVE_HOME/conf/hive-log4j2.properties -f
   sed -i "/# HADOOP_HOME=.*/aHADOOP_HOME=${HADOOP_HOME////\\/}" $HIVE_HOME/conf/hive-env.sh
   local v=$cwd/logs/hive
+  [ ! -e "$v" ] && echo -e "\e[32m [$v] doesn't exist, trying to create it.\e[0m" && mkdir -p $v
   sed -i "s/\(property.hive.log.dir = \).*/\1${v////\\/}/g" $HIVE_HOME/conf/hive-log4j2.properties
 }
 

@@ -1,0 +1,43 @@
+#!/bin/bash
+
+usage () {
+  echo -e "\e[31musage:\e[0m";
+  echo -e "\e[32m $0 hdfs <prop> <value>\e0m";
+}
+
+hdfs () {
+  site=$HADOOP_CONF_DIR/hdfs-site.xml
+  [ -z "$HADOOP_CONF_DIR" ] && {
+    site=$HADOOP_HOME/hdfs-site.xml
+  } && [ -z "$HADOOP_HOME" ] && {
+    fatal "HADOOP_CONF_DIR or HADOOP_HOME not defined.";
+  }
+  k=$(grep -n "<name>$1</name>" $site)
+  if [ -n "$k" ] ;then
+    kv=$(grep -o -z "<name>$1</name>\s*<value>[^<>/]*</value>" $site)
+    if [ $# -eq 1 ] ;then
+      info "$1 : $(echo $kv|grep value|awk -F\> '{print $4}'|awk -F\< '{print $1}')"
+    else
+      sed -i "/^\s*<name>$1<\/name>\s*$/{\$!{N;s/^\(\s*<name>dfs.replication<\/name>\s*\n\s*<value>\)[^<>]*\(<\/value>\)\$/\1$2\2/;ty;P;D;:y}}" $site
+    fi
+  fi
+}
+
+info() {
+  echo -e "\e[32m$*\e[0m"
+}
+
+warning () {
+  echo -e "\e[31m$*\e[0m";
+}
+
+fatal() {
+  warning $*;
+  exit -1;
+}
+
+case $1 in
+  hdfs) shift && hdfs $*;;
+  *) usage;;
+esac
+

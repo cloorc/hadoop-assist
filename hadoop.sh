@@ -22,6 +22,12 @@ init_hadoop () {
   export HADOOP_PID_DIR=${HADOOP_CD}/pid
   export HADOOP_LOGLEVEL=INFO
 
+  local automkdir="HADOOP_LOG_DIR HADOOP_PID_DIR"
+  for e in $automkdir ;do
+    local v=$(eval echo \$$e)
+    [ ! -e "$v" ] && echo -e "\e[32m [$v] doesn't exist, trying to create it.\e[0m" && mkdir -p $v
+  done
+
   local hadoopenv=${HADOOP_CD}/etc/hadoop/hadoop-env.sh
   local elist="JAVA_HOME HADOOP_CONF_DIR HADOOP_LOG_DIR HADOOP_PID_DIR HADOOP_LOGLEVEL"
   for e in $elist ;do
