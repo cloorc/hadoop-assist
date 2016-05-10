@@ -18,6 +18,10 @@
 
 <configuration>
   <property>
+    <name>dfs.namenode.name.dir</name>
+    <value>/media/ubuntu/disk50/hdfs-dir</value>
+  </property>
+  <property>
     <name>dfs.replication</name>
     <value>1</value>
   </property>
