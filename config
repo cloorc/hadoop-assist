@@ -43,8 +43,12 @@ hdfs () {
       [ $? -eq 0 ] && info "[mod] $1 = $v -> $2"
     fi
   else
-    sed -i "/<configuration>/a\ \ <property>\n    <name>$1<\/name>\n    <value>$2<\/value>\n  <\/property>" $site
-    [ $? -eq 0 ] && info "[add] $1 = $2"
+    if [ $# -eq 2 ] ;then
+      sed -i "/<configuration>/a\ \ <property>\n    <name>$1<\/name>\n    <value>$2<\/value>\n  <\/property>" $site
+      [ $? -eq 0 ] && info "[add] $1 = $2"
+    else
+      warning "property $1 not found."
+    fi
   fi
 }
 
