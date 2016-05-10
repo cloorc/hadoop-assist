@@ -29,25 +29,45 @@ hdfs () {
   } && [ -z "$HADOOP_HOME" ] && {
     fatal "HADOOP_CONF_DIR or HADOOP_HOME not defined.";
   }
-  k=$(grep -n "<name>$1</name>" $site)
+  
+  debug $*
+  for a in $* ;do
+    case $a in
+    --delete) mode=delete ;;
+    *) 
+      if [ -z "$prop" ] ;then
+        prop=$a
+      else
+        vnew=$a
+      fi
+      ;;
+    esac
+  done
+
+  debug $prop
+  debug $vnew
+  k=$(grep -n "<name>$prop</name>" $site)
   debug $k
   if [ -n "$k" ] ;then
-    kv=$(grep -o -z "<name>$1</name>\s*<value>[^<>]*</value>" $site)
+    kv=$(grep -o -z "<name>$prop</name>\s*<value>[^<>]*</value>" $site)
     v=$(echo $kv|grep value|awk -F\> '{print $4}'|awk -F\< '{print $1}')
     debug $kv
-    debug $v
-    if [ $# -eq 1 ] ;then
-      info "$1 : $v"
+    debug $v$(expr length "$v")
+    if [ "$mode$vnew" != "delete" ] ;then
+      sed -i "/^\s*<name>$prop<\/name>\s*$/{\$!{N;s/^\(\s*<name>$prop<\/name>\s*\n\s*<value>\)[^<>]*\(<\/value>\)\$/\1$vnew\2/;ty;P;D;:y}}" $site
+      [ $? -eq 0 ] && info "[mod] $prop = $v -> $vnew"
+    elif [ "$mode" = "delete" ] ;then
+      sed -i -z "s/\s*<property>\s*<name>$prop<\/name>\s*<value>[^<>\s]*<\/value>\s*<\/property>[^\n]*/  /g" $site
+      info "[del] $prop = "
     else
-      sed -i "/^\s*<name>$1<\/name>\s*$/{\$!{N;s/^\(\s*<name>dfs.replication<\/name>\s*\n\s*<value>\)[^<>]*\(<\/value>\)\$/\1$2\2/;ty;P;D;:y}}" $site
-      [ $? -eq 0 ] && info "[mod] $1 = $v -> $2"
+      info "$prop : $v"
     fi
   else
-    if [ $# -eq 2 ] ;then
-      sed -i "/<configuration>/a\ \ <property>\n    <name>$1<\/name>\n    <value>$2<\/value>\n  <\/property>" $site
-      [ $? -eq 0 ] && info "[add] $1 = $2"
+    if [ -n "$prop" -a -n "$vnew" ] ;then
+      sed -i "/<configuration>/a\ \ <property>\n    <name>$prop<\/name>\n    <value>$vnew<\/value>\n  <\/property>" $site
+      [ $? -eq 0 ] && info "[add] $prop = $vnew"
     else
-      warning "property $1 not found."
+      warning "property $prop not found."
     fi
   fi
 }
@@ -60,14 +80,16 @@ for c in $* ;do
       if [ -z "$cmd" ] ;then
         cmd=$c
       else
-        arg+=$c
+        arg+=" $c"
       fi
       ;;
   esac
 done
+arg=${arg## }
+arg=${arg%% }
 
 debug $cmd $arg
 case $cmd in
-  hdfs) hdfs $arg;;
+  hdfs) hdfs ${arg};;
   *) usage;;
 esac
