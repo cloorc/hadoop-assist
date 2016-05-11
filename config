@@ -44,6 +44,21 @@ hdfs () {
     esac
   done
 
+  [ $# -eq 0 ] && {
+    while read ln ;do
+      [ -z "$prop" ] && prop=$(echo $ln|grep name|awk -F\> '{print $2}'|awk -F\< '{print $1}')
+      [ -z "$vold" ] && {
+        vold=$(echo $ln|grep value|awk -F\> '{print $2}'|awk -F\< '{print $1}')
+        [ -n "$prop" -a -n "$vold" ] && {
+          info "$prop = $vold"
+          prop=
+          vold=
+        }
+      }
+    done<$site
+    return
+  }
+
   debug $prop
   debug $vnew
   k=$(grep -n "<name>$prop</name>" $site)
@@ -53,7 +68,7 @@ hdfs () {
     v=$(echo $kv|grep value|awk -F\> '{print $4}'|awk -F\< '{print $1}')
     debug $kv
     debug $v$(expr length "$v")
-    if [ "$mode$vnew" != "delete" ] ;then
+    if [ -n "$vnew" ] ;then
       sed -i "/^\s*<name>$prop<\/name>\s*$/{\$!{N;s/^\(\s*<name>$prop<\/name>\s*\n\s*<value>\)[^<>]*\(<\/value>\)\$/\1$vnew\2/;ty;P;D;:y}}" $site
       [ $? -eq 0 ] && info "[mod] $prop = $v -> $vnew"
     elif [ "$mode" = "delete" ] ;then

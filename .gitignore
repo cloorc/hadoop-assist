@@ -10,3 +10,4 @@ metastore_db/
 derby.log
 *.tbz
 ml-latest/
+*.swp
