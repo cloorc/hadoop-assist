@@ -22,14 +22,8 @@ usage () {
   info " $0 hdfs <prop> <value>";
 }
 
-hdfs () {
-  site=$HADOOP_CONF_DIR/hdfs-site.xml
-  [ -z "$HADOOP_CONF_DIR" ] && {
-    site=$HADOOP_HOME/hdfs-site.xml
-  } && [ -z "$HADOOP_HOME" ] && {
-    fatal "HADOOP_CONF_DIR or HADOOP_HOME not defined.";
-  }
-  
+doit () {
+  site=$1 && shift
   debug "$LINENO: $*"
   for a in $* ;do
     case $a in
@@ -91,6 +85,26 @@ hdfs () {
   fi
 }
 
+hdfs () {
+  site=$HADOOP_CONF_DIR/hdfs-site.xml
+  [ -z "$HADOOP_CONF_DIR" ] && {
+    site=$HADOOP_HOME/hdfs-site.xml
+  } && [ -z "$HADOOP_HOME" ] && {
+    fatal "HADOOP_CONF_DIR or HADOOP_HOME not defined.";
+  }
+  doit $site $*
+}
+
+core () {
+  site=$HADOOP_CONF_DIR/core-site.xml
+  [ -z "$HADOOP_CONF_DIR" ] && {
+    site=$HADOOP_HOME/core-site.xml
+  } && [ -z "$HADOOP_HOME" ] && {
+    fatal "HADOOP_CONF_DIR or HADOOP_HOME not defined.";
+  }
+  doit $site $*
+}
+
 for c in $* ;do
   case $c in
     -d)
@@ -110,5 +124,6 @@ arg=${arg%% }
 debug "$LINENO: $cmd $arg"
 case $cmd in
   hdfs) hdfs ${arg};;
+  core) core ${arg};;
   *) usage;;
 esac
