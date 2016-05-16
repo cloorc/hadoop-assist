@@ -30,7 +30,7 @@ hdfs () {
     fatal "HADOOP_CONF_DIR or HADOOP_HOME not defined.";
   }
   
-  debug $*
+  debug "$LINENO: $*"
   for a in $* ;do
     case $a in
     --delete) mode=delete ;;
@@ -59,26 +59,30 @@ hdfs () {
     return
   }
 
-  debug $prop
-  debug $vnew
+  debug "$LINENO: $prop"
+  debug "$LINENO: $vnew"
   k=$(grep -n "<name>$prop</name>" $site)
-  debug $k
+  debug "$LINENO: $k"
   if [ -n "$k" ] ;then
     kv=$(grep -o -z "<name>$prop</name>\s*<value>[^<>]*</value>" $site)
     v=$(echo $kv|grep value|awk -F\> '{print $4}'|awk -F\< '{print $1}')
-    debug $kv
-    debug $v$(expr length "$v")
+    debug "$LINENO: $kv"
+    debug "$LINENO: length of '$v' = $(expr length "$v")"
     if [ -n "$vnew" ] ;then
-      sed -i "/^\s*<name>$prop<\/name>\s*$/{\$!{N;s/^\(\s*<name>$prop<\/name>\s*\n\s*<value>\)[^<>]*\(<\/value>\)\$/\1$vnew\2/;ty;P;D;:y}}" $site
+      debug "$LINENO: [mod] $vnew"
+      sed -i -z "s/\(<name>$prop<\/name>\s*<value>\)[^<>]*\(<\/value>\)/\1${vnew//\//\\\/}\2/g" $site
       [ $? -eq 0 ] && info "[mod] $prop = $v -> $vnew"
     elif [ "$mode" = "delete" ] ;then
+      debug "$LINENO: [del]"
       sed -i -z "s/\s*<property>\s*<name>$prop<\/name>\s*<value>[^<>\s]*<\/value>\s*<\/property>[^\n]*/  /g" $site
       info "[del] $prop = "
     else
+      debug "$LINENO: [get]"
       info "$prop : $v"
     fi
   else
     if [ -n "$prop" -a -n "$vnew" ] ;then
+      debug "$LINENO: [add]"
       sed -i "/<configuration>/a\ \ <property>\n    <name>$prop<\/name>\n    <value>$vnew<\/value>\n  <\/property>" $site
       [ $? -eq 0 ] && info "[add] $prop = $vnew"
     else
@@ -103,7 +107,7 @@ done
 arg=${arg## }
 arg=${arg%% }
 
-debug $cmd $arg
+debug "$LINENO: $cmd $arg"
 case $cmd in
   hdfs) hdfs ${arg};;
   *) usage;;
