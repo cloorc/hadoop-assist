@@ -85,23 +85,16 @@ doit () {
   fi
 }
 
-hdfs () {
-  site=$HADOOP_CONF_DIR/hdfs-site.xml
+dispatch () {
+  role=$1 && shift
+  site=$HADOOP_CONF_DIR/$role-site.xml
   [ -z "$HADOOP_CONF_DIR" ] && {
-    site=$HADOOP_HOME/hdfs-site.xml
+    site=$HADOOP_HOME/$role-site.xml
   } && [ -z "$HADOOP_HOME" ] && {
     fatal "HADOOP_CONF_DIR or HADOOP_HOME not defined.";
   }
-  doit $site $*
-}
-
-core () {
-  site=$HADOOP_CONF_DIR/core-site.xml
-  [ -z "$HADOOP_CONF_DIR" ] && {
-    site=$HADOOP_HOME/core-site.xml
-  } && [ -z "$HADOOP_HOME" ] && {
-    fatal "HADOOP_CONF_DIR or HADOOP_HOME not defined.";
-  }
+  [ ! -e $site -a -e "${site}.template" ] && cp -f "${site}.template" $site 2>&1
+  [ ! -e $site ] && fatal "no such file exists: $site"
   doit $site $*
 }
 
@@ -123,7 +116,6 @@ arg=${arg%% }
 
 debug "$LINENO: $cmd $arg"
 case $cmd in
-  hdfs) hdfs ${arg};;
-  core) core ${arg};;
+  hdfs|core|mapred|yarn) dispatch $cmd ${arg};;
   *) usage;;
 esac
